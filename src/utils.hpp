@@ -21,7 +21,7 @@
 #define MAX_BUFFLEN 64000
 #define DEFAULT_LISTENER_COUNT 100
 #define DEFAULT_ROOT "..\\home"
-#define HTTP_TEMPLATE "HTTP/%d.%d %d OK\nContent-Type: text/%s"
+#define HTTP_TEMPLATE "HTTP/%d.%d %d OK\n"
 #define BUFF_PADDING 100
 
 enum request_type {
@@ -74,16 +74,17 @@ struct request_info {
 };
 
 struct response_info {
-    const int buff_len;
+    // const int buff_len;
     const char *root_dir;
     int response_type;
+    int maj_ver;
+    int min_ver;
 
     header_fields headers;
 // do something with this in the future
     std::string body;
 
-    response_info(const int len, const char *root) :
-        buff_len{len}, root_dir{root} {}
+    response_info(const char *root) : root_dir{root} {}
 };
 
 struct ip {

@@ -1,12 +1,12 @@
 #include "http.hpp"
 using namespace http;
-
 // #define DEBUG
 
 void set_request(const char* token, request_info &h);
 void get_request_buff(const char *req, char *request_buff);
 long int get_file_len(std::string &dir);
 void mappify(std::string const& s, header_fields &h);
+void make_response(std::string &s, response_info &res);
 
 void http::parse(const char *req, request_info &h) {
     // process requestline
@@ -34,7 +34,7 @@ void http::parse(const char *req, request_info &h) {
 
     // process headers
     mappify(header, h.headers);
-    
+    h.body = (body != NULL) ? body : "";
 }
 
 void http::send_response(SOCKET &client, request_info &req, response_info &res) {
@@ -76,13 +76,16 @@ void http::get_response(SOCKET &client, request_info &req, response_info &res) {
     char buff[MAX_BUFFLEN];
     ZeroMemory(buff, sizeof(buff));
 
-    // make a formatter and also make 206 responses possible
-    std::string msg = "HTTP/1.1 200 OK\nContent-Type: text/" + req.extention + 
-                        "\nAccess-Control-Allow-Credentials:true\n\n";
+    res.maj_ver = 1;
+    res.min_ver = 1;
+    res.response_type = 200;
 
     while (fread(buff, 1, sizeof(buff), f)) {
-        msg += buff;
+        res.body += buff;
     } // std::cout << msg << '\n';
+
+    std::string msg;
+    make_response(msg, res);
 
     {
         int sent{};
@@ -150,13 +153,36 @@ void mappify(std::string const& s, header_fields &h) {
     }
 }
 
+void make_response(std::string &s, response_info &res) {
+    {
+        char buff[MAX_BUFFLEN];
+        sprintf(buff, (char *)HTTP_TEMPLATE,
+                res.maj_ver, res.min_ver, res.response_type);
+        s += buff;
+    }
+
+    typedef header_fields::iterator header_it;
+    for (header_it i = res.headers.begin(); i != res.headers.end(); ++i) {
+        s += i->first + ": " + i->second + '\n';
+    } s += '\n';
+
+    s += res.body;
+}
+
 #ifdef DEBUG
 int main() {
-    header_fields h{};
-    mappify("A: a\nB: b\nC: c\n", h);
-    for (auto &s: h) {
-        std::cout << s.first << " " << s.second << '\n';
-    }
+    response_info h;
+    h.body = "foo";
+    h.maj_ver = 1;
+    h.min_ver = 1;
+    h.response_type = 100;
+    mappify("A: a\nB: b\nC: c\n", h.headers);
+    // for (auto &s: h.headers) {
+    //     std::cout << s.first << " " << s.second << '\n';
+    // }
+    std::string buff;
+    make_response(buff, h);
+    std::cout << buff;
     return 0;
 }
 #endif

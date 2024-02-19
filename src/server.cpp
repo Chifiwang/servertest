@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     if (response != socket_state::PASS) return response;
 
     response_info req{
-        DEFAULT_BUFFLEN,
+        // DEFAULT_BUFFLEN,
         (argc > 1) ? argv[terminal_codes::root_level] : (const char *)DEFAULT_ROOT
     };
 
