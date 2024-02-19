@@ -67,8 +67,9 @@ socket_state init_socket(SOCKET &soc, const ip& ip) {
 socket_state handle_requests(SOCKET &server, response_info &res) {
     int return_code;
     SOCKET client{INVALID_SOCKET};
-    request_info req;
+    // request_info req;
     do {
+        request_info req;
         client = accept(server, NULL, NULL);
         if (client == INVALID_SOCKET) {
             std::cerr << "Accept failed with error: " << WSAGetLastError();
@@ -94,7 +95,7 @@ socket_state handle_requests(SOCKET &server, response_info &res) {
         http::send_response(client, req, res);
 
         closesocket(client);
-        ZeroMemory(&req, sizeof(req));
+        // ZeroMemory(&req, sizeof(req)); // breaks things somehow
     } while (return_code != 0);
 
     return_code = shutdown(client, SD_SEND);
