@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.hpp": "cpp",
         "any": "cpp",
         "array": "cpp",
         "atomic": "cpp",
@@ -88,6 +89,12 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "buffer": "cpp",
+        "executor": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp",
+        "socket": "cpp"
+    },
+    "C_Cpp.default.intelliSenseMode": "windows-gcc-x86"
 }

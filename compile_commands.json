@@ -1,0 +1,5 @@
+{
+    "directory": "c:/user/chees/desktop/servertest/src",
+    "command": "c:/msys64/mingw64/bin/g++ server.cpp socket.cpp http.cpp -o server -l ws2_32",
+    "file": "server.cpp"
+}

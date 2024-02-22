@@ -21,7 +21,7 @@
 #define MAX_BUFFLEN 64000
 #define DEFAULT_LISTENER_COUNT 100
 #define DEFAULT_ROOT "..\\home"
-#define HTTP_TEMPLATE "HTTP/%d.%d %d %s\n"
+#define HTTP_TEMPLATE "HTTP/%d.%d %d OK\n"
 #define BUFF_PADDING 100
 
 enum request_type {
@@ -55,16 +55,43 @@ enum socket_state {
     SHUTDOWN_FAIL, 
     SEND_FAIL,
     RECV_FAIL,
-    CLOSE,
 };
 
-struct ip_info {
+typedef std::unordered_map<std::string, std::string> header_fields;
+struct request_info {
+// info buffer
+    char buff[DEFAULT_BUFFLEN];
+// request line
+    request_type type;
+    std::string uri;
+    std::string extention;
+    int maj_ver;
+    int min_ver;
+// header_fields
+    header_fields headers;
+// body
+    std::string body;
+};
+
+struct response_info {
+    // const int buff_len;
+    const char *root_dir;
+    int response_type;
+    int maj_ver;
+    int min_ver;
+
+    header_fields headers;
+// do something with this in the future
+    std::string body;
+
+    response_info(const char *root) : root_dir{root} {}
+};
+
+struct ip {
     int port;
     const char *port_s;
     const char *ipaddr;
     int listen_count;
 };
 
-typedef socket_state state;
-typedef std::string dir;
 #endif
