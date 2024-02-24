@@ -5,19 +5,31 @@
 #include "query.hpp"
 
 #define OK "OK"
-#define NOT_FOUND "Not Found"
 #define ERROR_404 "404"
+#define NOT_FOUND "Not Found"
+
+#define ERROR_505 "505"
+#define NOT_SUPPORTED "HTTP Version Not Supported"
+
+#define ERROR_418 "418"
+#define TEAPOT "I'm a teapot"
 
 namespace http {
-typedef std::unordered_map<std::string, std::string> header_fields;
+typedef std::unordered_map<std::string, std::string> fields;
 typedef std::string body_text;
+
+struct uri {
+    dir path;
+    fields queries;
+    fields fragments;
+};
 
 struct request {
     request_type type;
-    dir uri;
+    uri uri;
     int maj_ver;
     int min_ver;
-    header_fields headers;
+    fields headers;
     body_text body;
 };
 
@@ -27,7 +39,7 @@ struct response {
     int maj_ver;
     int min_ver;
     std::string response_type;
-    header_fields headers;
+    fields headers;
     body_text body;
 
     const dir path;
@@ -40,7 +52,6 @@ private:
 
 void parse(const char *request_buff, request &req);
 void format(std::string &s, response &res);
-void throw_404();
 }
 
 #endif

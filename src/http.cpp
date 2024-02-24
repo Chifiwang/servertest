@@ -3,7 +3,7 @@ using namespace http;
 // #define DEBUG
 void set_request(const char* token, request &h);
 void get_request_buff(const char *req, char *request_buff);
-void mappify(std::string const& s, header_fields &h);
+void mappify(std::string const& s, fields &h);
 
 void http::parse(const char *req, request &h) {
     // process requestline
@@ -11,14 +11,14 @@ void http::parse(const char *req, request &h) {
     get_request_buff(req, request_buff);
 
     char *request_line = strtok(request_buff, "\n");
-    std::string header{strtok(NULL, "|")};
+    // printf("%s\n", request_line);
+    std::string header = strtok(NULL, "|");
     [[maybe_unused]] char *body = strtok(NULL, "\0");
 
     char *req_type = strtok(request_line, " ");
     set_request(req_type, h);
 
     char *uri = strtok(NULL, " ");
-    h.uri = uri;
 
     strtok(NULL, "/"); // throw away "HTML/" from html version
     char *maj = strtok(NULL, ".");
@@ -26,12 +26,39 @@ void http::parse(const char *req, request &h) {
     char *min = strtok(NULL, "\0");
     h.min_ver = std::atoi(min);
 
-    // process headers
+    // process headers and body
     mappify(header, h.headers);
     h.body = (body != NULL) ? body : "";
+
+    h.uri.path = strtok_r(uri, "?#", &uri);
+    char *query = strtok_r(uri, "#", &uri);
+    char *frag = strtok_r(uri, "\0", &uri);
+
+    char *tok;
+    std::string key;
+    std::string val;
+
+    while ((tok = strtok_r(query, "&", &query))) {
+        key = strtok_r(tok, "=", &tok);
+        val = tok;
+        if (h.uri.queries.find(key) != h.uri.queries.end()) {
+            h.uri.queries[key] += "," + val;
+        } else {
+            h.uri.queries[key] = val;
+        }
+    }
+
+    while (tok = strtok_r(frag, "&", &frag)) {
+        key = strtok_r(tok, "=", &tok);
+        if (h.uri.fragments.find(key) != h.uri.fragments.end()) {
+            h.uri.fragments[key] += ',' + tok;
+        } else {
+            h.uri.fragments[key] = tok;
+        }
+    }
 }
 
-void mappify(std::string const& s, header_fields &h) {
+void mappify(std::string const& s, fields &h) {
     std::size_t ks = 0, ke, vs, ve;
 
     while ((ke = s.find(':', ks)) != std::string::npos) {
@@ -77,13 +104,13 @@ void http::format(std::string &s, response &res) {
             res.maj_ver, 
             res.min_ver, 
             res.response_code, 
-            res.response_type
+            res.response_type.data()
         );
         s += buff;
 
     }
 
-    typedef header_fields::iterator header_it;
+    typedef fields::iterator header_it;
     for (header_it i = res.headers.begin(); i != res.headers.end(); ++i) {
         s += i->first + ": " + i->second + '\n';
     } s += '\n';

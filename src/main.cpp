@@ -5,16 +5,21 @@ int main(int argc, char *argv[]) {
 
     Server s(DEFAULT_ROOT, DEFAULT_IP, DEFAULT_PORT);
 
-    s.get("/test.html", [](http::request req, http::response res) -> void {
+    s.define("/test.html", [](http::request req, http::response res) -> void {
         res.headers["Content-Type"] = "text/html";
         res.body = query::load(res.path);
         res.send();
     });
 
-    s.get("/style.css", [](http::request req, http::response res) -> void {
+    s.define("/style.css", [](http::request req, http::response res) -> void {
         res.headers["Content-Type"] = "text/css";
         res.body = query::load(res.path);
+        res.send();
+    });
 
+    s.define("/favicon.ico", [](http::request req, http::response res) -> void {
+        res.headers["Content-Type"] = "image/x-icon";
+        res.body = query::load(res.path);
         res.send();
     });
 

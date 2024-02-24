@@ -1,11 +1,24 @@
 //Compile command: g++ main.cpp server.cpp http.cpp query.cpp -o main -lws2_32
 #include "server.hpp"
 
-void tcp_server::get(dir uri, callable f) { respond[uri] = f; }
+void tcp_server::define(dir uri, callable f) { respond[uri] = f; }
 
 state tcp_server::listen() {
-    get(ERROR_404, [](http::request req, http::response res) -> void {
+    set_errors();
+
+    state soc_state;
+    soc_state = init();
+    if (soc_state != state::PASS) { return soc_state; }
+
+    soc_state = handle_requests();
+    return soc_state;
+}
+
+void tcp_server::set_errors() {
+    define(ERROR_404, [](http::request req, http::response res) -> void {
         res.headers["Content-Type"] = "text/html";
+        res.response_code = 404;
+        res.response_type = NOT_FOUND;
 
         res.body = 
             "<html>" \
@@ -18,15 +31,44 @@ state tcp_server::listen() {
 
         res.headers["Content-Length"] = std::to_string(res.body.size());
         res.send();
+        std::cerr << ERROR_404 << '\n';
     });
 
-    state soc_state;
+    define(ERROR_505, [](http::request req, http::response res) -> void {
+        res.headers["Content-Type"] = "text/html";
+        res.response_code = 505;
+        res.response_type = NOT_SUPPORTED;
 
-    soc_state = init();
-    if (soc_state != state::PASS) { return soc_state; }
+        res.body = 
+            "<html>" \
+            "<head><title>505 HTTP Version Not Supported</title></head>" \
+            "<body bgcolor=\"white\">" \
+            "<center><h1>505 HTTP Version Not Supported</h1></center>" \
+            "<hr><center>server-test</center>" \
+            "</body>" \
+            "</html>";
 
-    soc_state = handle_requests();
-    return soc_state;
+        res.headers["Content-Length"] = std::to_string(res.body.size());
+        res.send();
+    });
+
+    define(ERROR_505, [](http::request req, http::response res) -> void {
+        res.headers["Content-Type"] = "text/html";
+        res.response_code = 418;
+        res.response_type = TEAPOT;
+
+        res.body = 
+            "<html>" \
+            "<head><title>418 I'm a Teapot</title></head>" \
+            "<body bgcolor=\"white\">" \
+            "<center><h1>418 I'm a Teapot</h1></center>" \
+            "<hr><center>This server is a teapot, and it cannot brew coffee.</center>" \
+            "</body>" \
+            "</html>";
+
+        res.headers["Content-Length"] = std::to_string(res.body.size());
+        res.send();
+    });   
 }
 
 /**** HELPERS ****/
@@ -122,6 +164,19 @@ state tcp_server::read(SOCKET &c, char *buf) {
         return socket_state::PASS;
 }
 
+state tcp_server::send(SOCKET &c, http::request req, http::response res) {
+    if (respond.find(req.uri.path) == respond.end()) {
+        respond[ERROR_404](req, res);
+        return state::SEND_FAIL;
+    } else if (req.maj_ver != 1) {
+        respond[ERROR_505](req, res);
+        return state::SEND_FAIL;
+    }
+
+    respond[req.uri.path](req, res);
+    return state::PASS;
+}
+
 state tcp_server::handle_requests() {
     state err;
     SOCKET client{INVALID_SOCKET};
@@ -137,14 +192,12 @@ state tcp_server::handle_requests() {
         http::request req;
         http::parse(buf, req);
         
-        http::response res{client, root + req.uri};
+        http::response res{client, root + req.uri.path};
         res.maj_ver = 1;
         res.min_ver = 1;
         res.response_code = 200;
         res.response_type = OK;
-
-        if (respond.find(req.uri) == respond.end()) { req.uri = ERROR_404; }
-        respond[req.uri](req, res);
+        send(client, req, res);
 
         closesocket(client);
     } while (err == state::PASS);

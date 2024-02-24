@@ -13,3 +13,7 @@ std::string query::load(dir path) {
 
     return contents;
 }
+
+bool query::exists(dir path, int mode) {
+    return access(path.data(), mode) == 0;
+}
