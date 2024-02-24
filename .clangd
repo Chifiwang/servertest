@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-IC:\msys64\mingw64\include]

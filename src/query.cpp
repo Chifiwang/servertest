@@ -17,3 +17,12 @@ std::string query::load(dir path) {
 bool query::exists(dir path, int mode) {
     return access(path.data(), mode) == 0;
 }
+
+// query::node *query::make_dir(dir root, int foo, paths *exclude) {
+//     namespace fs = std::filesystem;
+//     for (const fs::__cxx11::directory_entry &f : fs::directory_iterator(root)) {
+//         std::cerr << f.path().string() << "\n";
+//     }
+
+//     return new query::node;
+// }

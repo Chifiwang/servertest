@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
     if (err != state::PASS) {
         // TODO
     } 
+    // query::make_dir(DEFAULT_ROOT, 0);
 
    return 0;
 }

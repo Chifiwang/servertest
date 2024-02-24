@@ -48,7 +48,7 @@ void http::parse(const char *req, request &h) {
         }
     }
 
-    while (tok = strtok_r(frag, "&", &frag)) {
+    while ((tok = strtok_r(frag, "&", &frag))) {
         key = strtok_r(tok, "=", &tok);
         if (h.uri.fragments.find(key) != h.uri.fragments.end()) {
             h.uri.fragments[key] += ',' + tok;

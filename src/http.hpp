@@ -34,7 +34,6 @@ struct request {
 };
 
 struct response {
-
     int response_code;
     int maj_ver;
     int min_ver;
@@ -43,8 +42,8 @@ struct response {
     body_text body;
 
     const dir path;
-
-    response(SOCKET &c, dir r) : client{&c}, path{r} {};
+public:
+    response(SOCKET &c, dir r) : path{r}, client{&c} {};
     state send();
 private:
     const SOCKET *client;
