@@ -17,9 +17,10 @@ int main(int argc, char *argv[]) {
         res.send();
     });
 
-    s.define("/favicon.ico", [](http::request req, http::response res) -> void {
-        res.headers["Content-Type"] = "image/x-icon";
-        res.body = query::load(res.path);
+    s.define("/favicon.png", [](http::request req, http::response res) -> void {
+        std::cout << "Favicon response sent\n";
+        res.headers["Content-Type"] = "image/png";
+        res.body = query::load_png(res.path);
         res.send();
     });
 
@@ -28,6 +29,8 @@ int main(int argc, char *argv[]) {
         // TODO
     } 
     // query::make_dir(DEFAULT_ROOT, 0);
-
+    // std::string foo{DEFAULT_ROOT};
+    // foo += "/favicon.png";
+    // std::cout << query::load_png(foo);
    return 0;
 }

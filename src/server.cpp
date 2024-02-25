@@ -52,7 +52,7 @@ void tcp_server::set_errors() {
         res.send();
     });
 
-    define(ERROR_505, [](http::request req, http::response res) -> void {
+    define(ERROR_418, [](http::request req, http::response res) -> void {
         res.headers["Content-Type"] = "text/html";
         res.response_code = 418;
         res.response_type = TEAPOT;

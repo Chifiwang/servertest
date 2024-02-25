@@ -18,11 +18,16 @@ bool query::exists(dir path, int mode) {
     return access(path.data(), mode) == 0;
 }
 
-// query::node *query::make_dir(dir root, int foo, paths *exclude) {
-//     namespace fs = std::filesystem;
-//     for (const fs::__cxx11::directory_entry &f : fs::directory_iterator(root)) {
-//         std::cerr << f.path().string() << "\n";
-//     }
+std::string query::load_png(dir path) {
+    std::ifstream f;
+    f.open(path, std::ios::in | std::ios::binary);
+    
+    f.seekg(0, std::ios::end);
+    size_t s = f.tellg();
 
-//     return new query::node;
-// }
+    char buf[s];
+    f.read(buf, s);
+    buf[s] = '\0';
+    std::string out{buf};
+    return out;
+}
