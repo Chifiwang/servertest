@@ -11,9 +11,13 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <bits/stdc++.h>
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include <thread>
+#include <future>
+#include <mutex>
 
 #define DEFAULT_PORT 80
 #define DEFAULT_PORT_S "80"
