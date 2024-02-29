@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     });
 
     s.define("/favicon.png", [](http::request req, http::response res) -> void {
-        std::cout << "Favicon response sent\n";
+        // std::cout << "Favicon response sent\n";
         res.headers["Content-Type"] = "image/png";
         res.body = query::load_png(res.path); // not working
         res.send();

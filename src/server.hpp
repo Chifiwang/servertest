@@ -7,7 +7,7 @@
 #include "http.hpp"
 #include "threads.hpp"
 
-typedef void (*callable)(http::request, http::response);
+typedef std::function<void(http::request, http::response)> callable;
 typedef std::unordered_map<dir, callable> response_table;
 typedef std::string_view ip_addr;
 
