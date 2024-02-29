@@ -223,29 +223,12 @@ state tcp_server::handle_requests() {
     return socket_state::PASS;
 }
 
-state multithreading_mixin::handle_client(char buf[MAX_BUFFLEN], SOCKET &c) {
-    http::request req;
-    http::parse(buf, req);
-    
-    http::response res{c, root + req.uri.path};
-    res.maj_ver = 1;
-    res.min_ver = 1;
-    res.response_code = 200;
-    res.response_type = OK;
-    send(c, req, res);
-
-    closesocket(c);
-    return state::PASS;
-}
-
-void work(multithreading_mixin *p, char buf[MAX_BUFFLEN], SOCKET &c) {
-    p->handle_client(buf, c);
-}
-
 state multithreading_mixin::handle_requests() {
     state err;
     SOCKET client{INVALID_SOCKET};
     int return_code;
+
+    thread::thread_pool threads(NUM_THREADS);
 
     do {
         char buf[MAX_BUFFLEN];
@@ -255,15 +238,21 @@ state multithreading_mixin::handle_requests() {
         if (err == state::CLOSE) { state::CLOSE; }
         else if (err != state::PASS) { return err; }
 
-        // std::thread worker(work, this, buf, client);
-        // worker.detach();
+        std::function<void()> f = [&buf, &client, this] {
+            // Sleep(2000);
+            http::request req;
+            http::parse(buf, req);
+            
+            http::response res{client, root + req.uri.path};
+            res.maj_ver = 1;
+            res.min_ver = 1;
+            res.response_code = 200;
+            res.response_type = OK;
+            send(client, req, res);
 
-        auto f = [&buf, &client](multithreading_mixin *p) {
-            work(p, buf, client);
+            closesocket(client);
         };
-
-        std::thread worker(f, this);
-        worker.detach();
+        threads.enqueue(f);
     } while (err != state::CLOSE);
 
     // int return_code;

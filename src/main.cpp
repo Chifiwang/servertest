@@ -20,17 +20,13 @@ int main(int argc, char *argv[]) {
     s.define("/favicon.png", [](http::request req, http::response res) -> void {
         std::cout << "Favicon response sent\n";
         res.headers["Content-Type"] = "image/png";
-        res.body = query::load_png(res.path);
+        res.body = query::load_png(res.path); // not working
         res.send();
     });
 
     err = s.listen();
     if (err != state::PASS) {
         // TODO
-    } 
-    // query::make_dir(DEFAULT_ROOT, 0);
-    // std::string foo{DEFAULT_ROOT};
-    // foo += "/favicon.png";
-    // std::cout << query::load_png(foo);
+    }
    return 0;
 }

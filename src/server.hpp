@@ -1,8 +1,11 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#define NUM_THREADS 4
+
 #include "utils.hpp"
 #include "http.hpp"
+#include "threads.hpp"
 
 typedef void (*callable)(http::request, http::response);
 typedef std::unordered_map<dir, callable> response_table;
@@ -31,6 +34,7 @@ public:
     /* TODO add more http response types*/
     virtual void define(dir uri, callable f) = 0;
     virtual state listen() = 0;
+    const dir &get_root() { return root; }
 };
 
 class tcp_server : public base_server {
